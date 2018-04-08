@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using ExpectedObjects;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
@@ -7,44 +8,79 @@ namespace AssertionSample
     [TestClass]
     public class AssertionSample
     {
-        private CustomerRepo customerRepo = new CustomerRepo();
+        private readonly CustomerRepo _customerRepo = new CustomerRepo();
 
         [TestMethod]
         public void CompareCustomer()
         {
-            var actual = customerRepo.Get();
-
+            var actual = _customerRepo.Get();
+            var expected = new Customer
+            {
+                Id = 2,
+                Age = 18,
+                Birthday = new DateTime(1990, 1, 26)
+            };
             //how to assert customer?
+            expected.ToExpectedObject().ShouldEqual(actual);
         }
 
         [TestMethod]
         public void CompareCustomerList()
         {
-            var actual = customerRepo.GetAll();
+            var actual = _customerRepo.GetAll();
 
+            var expected = new List<Customer>
+            {
+                new Customer()
+                {
+                    Id=3,
+                    Age=20,
+                    Birthday = new DateTime(1993,1,2)
+                },
+
+                new Customer()
+                {
+                    Id=4,
+                    Age=21,
+                    Birthday = new DateTime(1993,1,3)
+                },
+            };
             //how to assert customers?
+            expected.ToExpectedObject().ShouldEqual(actual);
         }
 
         [TestMethod]
         public void CompareComposedCustomer()
         {
-            var actual = customerRepo.GetComposedCustomer();
-
+            var actual = _customerRepo.GetComposedCustomer();
+            var expected = new Customer()
+            {
+                Age = 30,
+                Id = 11,
+                Birthday = new DateTime(1999, 9, 9),
+                Order = new Order { Id = 19, Price = 91 },
+            };
             //how to assert composed customer?
+            expected.ToExpectedObject().ShouldEqual(actual);
         }
 
+        /// <summary>
+        /// Partials the compare customer birthday and order price.
+        /// partial compare should use anonymous type
+        /// </summary>
         [TestMethod]
         public void PartialCompare_Customer_Birthday_And_Order_Price()
         {
-            var actual = customerRepo.GetComposedCustomer();
+            var actual = _customerRepo.GetComposedCustomer();
 
-            var expected = new Customer()
+            var expected = new
             {
                 Birthday = new DateTime(1999, 9, 9),
-                Order = new Order { Price = 91 },
+                Order = new { Price = 91 },
             };
 
             //how to assert actual is equal to expected?
+            expected.ToExpectedObject().ShouldMatch(actual);
         }
     }
 
